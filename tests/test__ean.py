@@ -7,6 +7,15 @@ import pytest
 from barcode_generator import encode_ean
 
 
+# def test__encoded_ean_is_a_bit_array():
+#     """
+#     Test the ``main`` function.
+#     """
+#     code = "1234567"
+#     expected = []
+#     assert encode_ean(code) == expected
+
+
 @pytest.mark.parametrize(
     "code, expected",
     [
@@ -17,6 +26,6 @@ from barcode_generator import encode_ean
 )
 def test__ean_can_be_encoded(code: str, expected: str):
     """
-    Test the ``main`` function.
+    EANs can be encoded.
     """
     assert str(encode_ean(code)) == expected

@@ -1,5 +1,5 @@
 """
-Converts a list of list into gray-scale PNG image.
+EAN-8 and EAN-13 barcode generator.
 """
 
 from __future__ import annotations

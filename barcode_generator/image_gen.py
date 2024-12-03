@@ -1,27 +1,72 @@
 """
 Image generator.
 """
-import zlib
-import struct
 
-from barcode_generator import encode_ean
+import struct
+import zlib
 
 HEIGHT = 30
 PADDING = 4
-MAKE_IHDR = True
-MAKE_IDAT = True
-MAKE_IEND = True
+
+TRUE_GRAY = 0  # true gray image (no palette)
+ONE_BYTE_PER_PIXEL = 8  # one byte per pixel (0..255)
+ZLIB = 0
+ADAPTIVE = 0  # each scanline separate
+NO_INTERLACE = 0  # no
 
 EAN8_BIT_LENGTH = (7 * 8) + 11
 EAN13_BIT_LENGTH = (7 * 13) + 11
 
 
 def _i1(value):
-    return struct.pack("!B", value & (2**8-1))
+    return struct.pack("!B", value & (2**8 - 1))
 
 
 def _i4(value):
-    return struct.pack("!I", value & (2**32-1))
+    return struct.pack("!I", value & (2**32 - 1))
+
+
+def _png_header(  # noqa: PLR0913
+    width: int,
+    height: int,
+    color_type: int = TRUE_GRAY,
+    bit_depth: int = ONE_BYTE_PER_PIXEL,
+    compression: int = ZLIB,
+    filter_type: int = ADAPTIVE,
+    interlaced: int = NO_INTERLACE,
+) -> bytes:
+    header = (
+        _i4(width)
+        + _i4(height)
+        + _i1(bit_depth)
+        + _i1(color_type)
+        + _i1(compression)
+        + _i1(filter_type)
+        + _i1(interlaced)
+    )
+    block = "IHDR".encode("ascii") + header
+
+    return _i4(len(header)) + block + _i4(zlib.crc32(block))
+
+
+def _png_footer() -> bytes:
+    block = "IEND".encode("ascii")
+
+    return _i4(0) + block + _i4(zlib.crc32(block))
+
+
+def _png_data(data: list[bool], width: int, height: int) -> bytes:
+    raw = b""
+    for _ in range(height):
+        raw += b"\0"  # no filter for this scanline
+        for digit in data:
+            raw += b"\0" if digit else b"\255"
+
+    compressor = zlib.compressobj()
+    compressed = compressor.compress(raw) + compressor.flush()
+    block = "IDAT".encode("ascii") + compressed
+
+    return _i4(len(compressed)) + block + _i4(zlib.crc32(block))
 
 
 def make_png(encoded_barcode: list[bool]):
@@ -29,48 +74,12 @@ def make_png(encoded_barcode: list[bool]):
         raise ValueError("Data length does not match.")
 
     height = HEIGHT
-    width = len(encoded_barcode) # + PADDING
-    png = b"\x89" + "PNG\r\n\x1A\n".encode("ascii")
+    width = len(encoded_barcode)  # + PADDING
 
-    if MAKE_IHDR:
-        colortype = 0 # true gray image (no palette)
-        bitdepth = 8 # with one byte per pixel (0..255)
-        compression = 0 # zlib (no choice here)
-        filtertype = 0 # adaptive (each scanline seperately)
-        interlaced = 0 # no
-        IHDR = _i4(width) + _i4(height) + _i1(bitdepth)
-        IHDR += _i1(colortype) + _i1(compression)
-        IHDR += _i1(filtertype) + _i1(interlaced)
-        block = "IHDR".encode("ascii") + IHDR
-        png += _i4(len(IHDR)) + block + _i4(zlib.crc32(block))
-
-    if MAKE_IDAT:
-        raw = b""
-        for _ in range(height):
-            raw += b"\0"  # no filter for this scanline
-            for digit in encoded_barcode:
-                raw += b"\0" if digit else b"\255"
-
-        compressor = zlib.compressobj()
-        compressed = compressor.compress(raw)
-        compressed += compressor.flush()
-        block = "IDAT".encode("ascii") + compressed
-        png += _i4(len(compressed)) + block + _i4(zlib.crc32(block))
-
-    if MAKE_IEND:
-        block = "IEND".encode("ascii")
-        png += _i4(0) + block + _i4(zlib.crc32(block))
-
-    return png
-
-
-
-def main() -> None:
-    with open("fixtures/code.png", "wb") as f:
-        png = make_png(encode_ean("12345670"))
-        f.write(png)
-        print(png)
-
-
-if __name__ == "__main__":
-    main()
+    return (
+        b"\x89"
+        + "PNG\r\n\x1a\n".encode("ascii")
+        + _png_header(width, height)
+        + _png_data(encoded_barcode, width, height)
+        + _png_footer()
+    )

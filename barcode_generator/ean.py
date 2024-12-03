@@ -9,7 +9,6 @@ import dataclasses
 
 @dataclasses.dataclass
 class BitArray(list):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -32,6 +31,9 @@ class EncodedNumber:
     right: BitArray
     checksum: BitArray
 
+
+EAN8_MIDPOINT = 4
+EAN13_MIDPOINT = 7
 
 EDGE = BitArray.from_ints(1, 0, 1)
 MIDDLE = BitArray.from_ints(0, 1, 0, 1, 0)
@@ -100,48 +102,55 @@ ENCODER_TABLE: dict[str, EncodedNumber] = {
 
 
 def _calculate_checksum(code: str) -> str:
-    x3 = len(code) == 7
-    sum = 0
-    for r in code:
-        cur_num = int(r)
-        if cur_num < 0 or cur_num > 9:
-            return 'B'
-        if x3:
-            cur_num = cur_num * 3
-        x3 = not x3
-        sum += cur_num
-    return str((10 - (sum % 10)) % 10)
+    """
+    EAN uses a modulo 10 checksum scheme.
+    """
+    parity = len(code) % 2
+    odd_sum = sum(int(rune) for i, rune in enumerate(code) if i % 2 == parity)
+    even_sum = sum(int(rune) for i, rune in enumerate(code) if i % 2 != parity)
+    total_sum = (even_sum * 3) + odd_sum
+
+    return str((10 - (total_sum % 10)) % 10)
 
 
 def _encode_ean8(code: str) -> BitArray:
+    """
+    Encode an EAN8 barcode.
+    """
     result = BitArray()
     result.extend(EDGE)
     for i, digit in enumerate(code):
-        num = ENCODER_TABLE[digit]
-        data = num.left_odd if i < 4 else num.right
-        if i == 4:
+        if i == EAN8_MIDPOINT:
             result.extend(MIDDLE)
-        result.extend(data)
+
+        bits = ENCODER_TABLE[digit]
+        result.extend(bits.left_odd if i < EAN8_MIDPOINT else bits.right)
+
     result.extend(EDGE)
     return result
 
 
 def _encode_ean13(code: str) -> BitArray:
+    """
+    Encode an EAN13 barcode.
+    """
     result = BitArray()
     result.extend(EDGE)
     first_num = []
-    for cpos, r in enumerate(code):
-        num = ENCODER_TABLE[r]
-        if cpos == 0:
+    for i, digit in enumerate(code):
+        if i == EAN13_MIDPOINT:
+            result.extend(MIDDLE)
+
+        num = ENCODER_TABLE[digit]
+        if i == 0:
             first_num = num.checksum
             continue
-        if cpos < 7:
-            data = num.left_even if first_num[cpos - 1] else num.left_odd
+        if i < EAN13_MIDPOINT:
+            data = num.left_even if first_num[i - 1] else num.left_odd
         else:
             data = num.right
-        if cpos == 7:
-            result.extend(MIDDLE)
         result.extend(data)
+
     result.extend(EDGE)
     return result
 
@@ -159,4 +168,8 @@ def encode_ean(code: str) -> BitArray:
     else:
         raise ValueError("code is not EAN8 or EAN13")
 
-    return _encode_ean8(barcode) if len(barcode) == 8 else _encode_ean13(barcode)
+    encoders = {
+        8: _encode_ean8,
+        13: _encode_ean13,
+    }
+    return encoders[len(barcode)](barcode)

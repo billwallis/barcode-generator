@@ -4,12 +4,12 @@ build-backend = "poetry.core.masonry.api"
 
 
 [tool.poetry]
-name = "python-template"
+name = "barcode-generator"
 version = "0.0.0"
 description = ""
 authors = ["Bilbottom"]
 readme = "README.md"
-packages = [{include = "src"}]
+packages = [{include = "barcode_generator"}]
 #package-mode = false
 
 [tool.poetry.dependencies]
@@ -29,7 +29,7 @@ pytest-cov = "^4.1.0"
 
 
 [tool.pytest.ini_options]
-addopts = "--cov=src --cov-fail-under=80"
+addopts = "--cov=barcode_generator --cov-fail-under=80"
 testpaths = ["tests"]
 
 

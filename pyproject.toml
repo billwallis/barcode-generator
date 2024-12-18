@@ -10,10 +10,14 @@ description = ""
 authors = ["Bilbottom"]
 readme = "README.md"
 packages = [{include = "barcode_generator"}]
-#package-mode = false
+
+[tool.poetry.scripts]
+code-gen = "barcode_generator.__main__:arguably.run"
 
 [tool.poetry.dependencies]
 python = "^3.11"
+
+arguably = "^1.3.0"
 
 [tool.poetry.group]
 dev.optional = true

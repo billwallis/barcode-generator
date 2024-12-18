@@ -1,3 +1,6 @@
+# Image catalog
+catalog/
+
 # IntelliJ project files
 .idea/
 .run/

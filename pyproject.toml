@@ -1,27 +1,29 @@
+[project]
+name = "barcode-generator"
+version = "0.0.0"
+description = ""
+authors = [{name = "Bilbottom"}]
+readme = "README.md"
+requires-python = ">=3.11,<4.0"
+dynamic = ["dependencies"]
+
+[project.scripts]
+code-gen = "barcode_generator.__main__:arguably.run"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 
 [tool.poetry]
-name = "barcode-generator"
-version = "0.0.0"
-description = ""
-authors = ["Bilbottom"]
-readme = "README.md"
 packages = [{include = "barcode_generator"}]
 
-[tool.poetry.scripts]
-code-gen = "barcode_generator.__main__:arguably.run"
-
 [tool.poetry.dependencies]
-python = "^3.11"
-
 arguably = "^1.3.0"
 
 [tool.poetry.group]
-dev.optional = true
-test.optional = true
+dev.optional = false
+test.optional = false
 
 [tool.poetry.group.dev.dependencies]
 coverage-badge = "^1.1.0"

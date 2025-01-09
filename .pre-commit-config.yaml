@@ -1,7 +1,7 @@
 ---
 ci:
   autoupdate_schedule: quarterly
-  skip: ["poetry-lock", "sourcery", "pytest", "coverage-badge"]
+  skip: ["identity", "poetry-lock", "pytest", "coverage-badge"]
 
 repos:
   - repo: meta
@@ -32,7 +32,7 @@ repos:
         name: Validate Python
 
   - repo: https://github.com/python-poetry/poetry
-    rev: 1.8.0
+    rev: 2.0.0
     hooks:
       - id: poetry-check
         name: Check that the Poetry configuration is valid
@@ -47,23 +47,13 @@ repos:
         name: Make code pretty
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.9
+    rev: v0.8.6
     hooks:
       - id: ruff
         name: Lint Python code
         args: ["--fix"]
       - id: ruff-format
         name: Format Python code
-
-  # Sourcery
-  - repo: https://github.com/sourcery-ai/sourcery
-    rev: v1.23.0
-    hooks:
-      - id: sourcery
-        name: Check for refactoring opportunities
-        args: ["--diff=git diff HEAD", "--no-summary"]
-        files: drawings
-        exclude: \.*/__init__\.py
 
   # Testing and coverage
   - repo: local

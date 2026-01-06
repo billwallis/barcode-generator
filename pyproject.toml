@@ -20,12 +20,12 @@ code-gen = "barcode_generator.__main__:arguably.run"
 
 [dependency-groups]
 dev = [
-    "coverage-badge>=1.1.0",
-    "pre-commit>=4.1.0",
+    "coverage-badge>=1.1.2",
+    "pre-commit>=4.5.1",
 ]
 test = [
-    "pytest>=8.3.5",
-    "pytest-cov>=6.0.0",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
 ]
 
 

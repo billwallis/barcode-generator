@@ -18,11 +18,11 @@ EAN8_BIT_LENGTH = (7 * 8) + 11
 EAN13_BIT_LENGTH = (7 * 13) + 11
 
 
-def _i1(value):
+def _i1(value: int) -> bytes:
     return struct.pack("!B", value & (2**8 - 1))
 
 
-def _i4(value):
+def _i4(value: int) -> bytes:
     return struct.pack("!I", value & (2**32 - 1))
 
 
@@ -69,7 +69,7 @@ def _png_data(data: list[bool], width: int, height: int) -> bytes:
     return _i4(len(compressed)) + block + _i4(zlib.crc32(block))
 
 
-def make_png(encoded_barcode: list[bool]):
+def make_png(encoded_barcode: list[bool]) -> bytes:
     if len(encoded_barcode) not in [EAN8_BIT_LENGTH, EAN13_BIT_LENGTH]:
         raise ValueError("Data length does not match.")
 

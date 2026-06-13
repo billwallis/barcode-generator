@@ -26,7 +26,7 @@ def wifi_qr_data(
     )
 
 
-def main():
+def main() -> int:
     ssid = os.environ["WIFI_SSID"]
     password = os.environ["WIFI_PASSWORD"]
     admin_password = os.environ["WIFI_ADMIN_PASSWORD"]
@@ -36,6 +36,8 @@ def main():
     qr_code = segno.make_qr(qr_data)
     qr_code.save("home-wifi-qr.png", scale=20)
 
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

@@ -32,10 +32,6 @@ test = [
 ]
 
 
-[tool.setuptools]
-packages = ["barcode_generator"]
-
-
 [tool.uv]
 default-groups = "all"
 
@@ -81,7 +77,7 @@ shell = """
 
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["src", "tests"]
 
 [tool.coverage]
 run.plugins = ["covdefaults"]  # https://youtu.be/70T6OxKwxm0

@@ -77,9 +77,10 @@ shell = """
 
 
 [tool.pytest.ini_options]
-testpaths = ["src", "tests"]
+testpaths = ["tests"]
 
 [tool.coverage]
+run.source = ["src", "tests"]
 run.plugins = ["covdefaults"]  # https://youtu.be/70T6OxKwxm0
 report.fail_under = 80
 report.exclude_lines = [

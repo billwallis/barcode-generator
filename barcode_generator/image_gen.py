@@ -26,7 +26,7 @@ def _i4(value: int) -> bytes:
     return struct.pack("!I", value & (2**32 - 1))
 
 
-def _png_header(  # noqa: PLR0913
+def _png_header(  # noqa: PLR0913, PLR0917
     width: int,
     height: int,
     color_type: int = TRUE_GRAY,
